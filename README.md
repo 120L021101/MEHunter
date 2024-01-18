@@ -90,7 +90,7 @@ wheel                     0.42.0             pyhd8ed1ab_0    conda-forge
 xz                        5.2.6                h166bdaf_0    conda-forge
 zipp                      3.15.0                   pypi_0    pypi
 ```
-You should alse install minimap2.
+You should also install minimap2.
 
 ## Installation
 
