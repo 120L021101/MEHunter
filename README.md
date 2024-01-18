@@ -1,5 +1,9 @@
 # MEHunter
 
+## Getting Start
+
+<img src="pics/image.png" width="100%" height="auto">
+
 ## Abstract
 MEHunter is a Natural Language Processing method based on BERT to comprehensively and accurately detect Mobile Element Insertions and Deletions utilizing third-generation sequencing technologies.
 Till now, I haven't summarized all the dependencies. Below is my conda environment:
