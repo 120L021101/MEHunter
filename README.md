@@ -2,9 +2,10 @@
 
 ## Getting Start
 
-不是。。。。啊？？？你真打算找我运行啊，请务必移步别处<p></p>
-这里有的，只是对技术纯粹的热爱，这里欢迎的，只有和我一样的人。
+这里有的，只是对技术纯粹的热爱，这里欢迎的，只有和我一样的人。<p></p>
+请务必移步别处，你要安装的东西“被”不在这里。
 
+<!-- 
 <img src="pics/image.png" width="100%" height="auto">
 
 ## Abstract
@@ -115,4 +116,4 @@ pip install .
 usage: MEHunter [-h] [--version] [-t THREADS] [--retain_work_dir]
                 [--batch_size BATCH_SIZE]
                 [VCF] [BAM] cuteSV_workdir reference known_ME work_dir output
-```
+``` -->
