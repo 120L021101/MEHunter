@@ -2,9 +2,7 @@
 
 ## Getting Start
 
-这里有的，只是对技术纯粹的热爱，这里欢迎的，只有和我一样的人。<p></p>
-我附庸的附庸不是我的附庸，我写出来的代码也未必属于我。<p></p>
-将军的恩情，永世难忘！
+404 NOT FOUND
 
 <!-- 
 <img src="pics/image.png" width="100%" height="auto">
