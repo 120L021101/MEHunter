@@ -1,4 +1,3 @@
-import pandas as pd
 from typing import *
 import time
 import os
@@ -6,8 +5,8 @@ import logging
 import sys
 from MEHunter.MEHunter_description import VERSION
 
-def write_to_vcf(insertions : Optional[pd.DataFrame], \
-                 deletions  : Optional[pd.DataFrame], \
+def write_to_vcf(insertions : Optional[Any], \
+                 deletions  : Optional[Any], \
 				 columns_name  : Optional[List], \
                  args, argv):
 

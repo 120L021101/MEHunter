@@ -73,6 +73,7 @@ Then run
 
 ``` shell script
 conda create -n MEHunterEnv python=3.7
+pip install Cython
 conda activate MEHunterEnv
 pip install .
 ```
@@ -89,7 +90,7 @@ Note That MEHunter/ME_data/ME.fq will be used later(in the usage example)
 #################
 export BAMPATH=/mnt/mybook/zzj_data2/HG00731/HIFI/pick_me.bam # alignment file, .bam
 export REFPATH=/mnt/mybook/Real_data/hg38.fa  # like hs37d5 or hg38, .fa
-export CUTESV_WORKDIR=./cuteWork/ # workdir of cuteSV, any dir is OK, and I personally recommend add "rm -rf $CUTESV_WORKDIR/*" before running.
+export CUTESV_WORKDIR=/home/zzj/temp/cuteWork # workdir of cuteSV, any dir is OK, and I personally recommend add "rm -rf $CUTESV_WORKDIR/*" before running.
 export CUTESV_OUTPUT=cuteSV_HiFi.vcf # path of cuteSV's final output, in .vcf format, note that it's acutually a path, not the file name.
 export PROCESS_NUM=16 # number of mutil-processing
 
@@ -101,24 +102,25 @@ export MIN_SUPPORT=6 # minimal number of supporting reads, for detailed info, se
 export cuteSVenvName=cuteSVenv # conda enviroment name of cuteSV, mine is cuteSVenv, same as what's mentioned above.
 
 conda activate $cuteSVenvName
-cuteSV $BAMFILE $REFPATH $CUTESV_OUTPUT --genotype \
-         $CUTESV_WORKDIR -s $MIN_SUPPORT -t $PROCESS_NUM -L 10000 --report_readid --retain_work_dir --diff_ratio_merging_INS 1.1 --diff_ratio_merging_DEL 1.1 --diff_ratio_filtering_TRA 1.1
+cuteSV $BAMPATH $REFPATH $CUTESV_OUTPUT $CUTESV_WORKDIR --genotype \
+          -s $MIN_SUPPORT -t $PROCESS_NUM -L 10000 --report_readid --retain_work_dir --diff_ratio_merging_INS 1.1 --diff_ratio_merging_DEL 1.1 --diff_ratio_filtering_TRA 1.1
 
 
 ############################
 # MEHunter'S UNIQUE PARAMS #
 ############################
-export MEHUNTER_WORKDIR=./MEHunterWork # workdir of MEHunter, any dir is OK, and I personally recommend add "rm -rf $MEHUNTER_WORKDIR/*" before running as well.
+export MEHUNTER_WORKDIR=/home/zzj/temp/MEHunterWork # workdir of MEHunter, any dir is OK, and I personally recommend add "rm -rf $MEHUNTER_WORKDIR/*" before running as well.
 export MEHUNTER_OUTPUT=./MEHunter_HiFi.vcf # path of MEHunter's final output, in .vcf format
-export KNOWN_ME_PATH=/data/3/zzj/ME_data/ME.fq # See MEHunter/ME_data/ME.fq, path of known ME sequences, .fq format
-export DL_PATH=./MEHunter_DL # See step2, path of the downloaded model.
+export KNOWN_ME_PATH=/home/zzj/temp/MEHunter/ME_data/ME.fq # See MEHunter/ME_data/ME.fq(at your download path), path of known ME sequences, .fq format
+export DL_PATH=/home/zzj/MEHunter/src/MEHunter/pre_classifier/model # See step2, path of the downloaded model.
 export DEEPLEARNING_BATCHSIZE=32 # batch size of input, it highly affects memory usage, you may have to use another smaller number.
-export MEHunterEnvName=MEHunter # conda enviroment name of MEHunter
+export MEHunterEnvName=MEHunter_T # conda enviroment name of MEHunter
 
 conda activate $MEHunterEnvName
 MEHunter $CUTESV_OUTPUT $BAMPATH \
         $CUTESV_WORKDIR $REFPATH $KNOWN_ME_PATH $MEHUNTER_WORKDIR $MEHUNTER_OUTPUT \
         --DL_module $DL_PATH --retain_work_dir -t $PROCESS_NUM --batch_size 32 --MAX_seqs 10
+
 
 ```
 Those exported params are essential and/or frequently changed depending on need. Info of other params of cuteSV/MEHunter, see orginal doc and run MEHunter -h respectively.

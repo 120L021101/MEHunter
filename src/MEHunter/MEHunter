@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from MEHunter.MEHunter_utils import read_vcf, clear_workdir, call, kill_output, activate_output, cluster2fasta
-# params = kill_output()
+params = kill_output()
 from MEHunter.MEHunter_classfy import BERT_classify, re_re_alignment, activate_BERT
-# activate_output(params)
+activate_output(params)
 
 import sys, os, logging, time, gc
 from MEHunter.MEHunter_description import parseArgs
@@ -72,7 +72,7 @@ def setupLogging(debug=False):
 
 def run(argv):
     args = parseArgs(argv)
-    activate_BERT(args)
+    params = kill_output(); activate_BERT(args); activate_output(params)
     setupLogging(False)
     start_time = time.time()
     main_ctrl(args, argv)

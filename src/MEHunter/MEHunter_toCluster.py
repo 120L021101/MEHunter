@@ -1,5 +1,3 @@
-import pandas as pd
-import pysam
 from typing import *
 import logging
 import sys
@@ -7,7 +5,6 @@ import os
 import pyfastx
 import pyabpoa as pa
 from multiprocessing import Process
-import random
 from MEHunter.MEHunter_utils import call
 
 def find_similar_seqs(seqs, MAX_seqs = 20):

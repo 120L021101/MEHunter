@@ -1,12 +1,7 @@
-import pandas as pd
 import os
-import argparse
 import logging
 import sys
-import time
-import gc
 import subprocess
-import pandas as pd  
 
 def is_empty(file_path):
     with open(file=file_path, mode='r', encoding='utf-8') as try_file:
@@ -14,7 +9,7 @@ def is_empty(file_path):
     return ret_value
 
 def function_wrapper(function, *args):
-    import sys, io, os
+    import sys, io
     stdout_buffer = io.StringIO(); stderr_buffer = io.StringIO()
     stdout_old = sys.stdout; stderr_old = sys.stderr
     sys.stdout = stdout_buffer; sys.stderr = stderr_buffer
@@ -24,7 +19,7 @@ def function_wrapper(function, *args):
     return ret_vals
 
 def kill_output():
-    import sys, io, os
+    import sys, io
     stdout_buffer = io.StringIO(); stderr_buffer = io.StringIO()
     stdout_old = sys.stdout; stderr_old = sys.stderr
     sys.stdout = stdout_buffer; sys.stderr = stderr_buffer
@@ -37,7 +32,7 @@ def activate_output(args):
     sys.stdout = stdout_old; sys.stderr = stderr_old
 
 def call(cmd):
-    import sys, io, os
+    import os
     cmd += ' 2> {}'.format(os.devnull)
     subprocess.call(cmd, shell=True)
 

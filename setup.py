@@ -42,6 +42,6 @@ setup(
     scripts=['src/MEHunter/MEHunter'],
     long_description = LONG_DESCRIPTION,
     zip_safe = False,
-    install_requires = ['pysam', 'Biopython', 'Cigar'],
+    install_requires = ['einops', 'torch', 'transformers', 'pysam', 'pyfastx', 'pyabpoa', 'Biopython', 'Cigar'],
     ext_modules = cythonize(ext_modules)
 )
