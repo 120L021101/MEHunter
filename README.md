@@ -77,6 +77,8 @@ conda activate MEHunterEnv
 pip install .
 ```
 
+Note That MEHunter/ME_data/ME.fq will be used later(in the usage example)
+
 ## Usage
 
 ### An example
@@ -108,7 +110,7 @@ cuteSV $BAMFILE $REFPATH $CUTESV_OUTPUT --genotype \
 ############################
 export MEHUNTER_WORKDIR=./MEHunterWork # workdir of MEHunter, any dir is OK, and I personally recommend add "rm -rf $MEHUNTER_WORKDIR/*" before running as well.
 export MEHUNTER_OUTPUT=./MEHunter_HiFi.vcf # path of MEHunter's final output, in .vcf format
-export KNOWN_ME_PATH=/data/3/zzj/ME_data/ME.fq # path of known ME sequences, .fq format
+export KNOWN_ME_PATH=/data/3/zzj/ME_data/ME.fq # See MEHunter/ME_data/ME.fq, path of known ME sequences, .fq format
 export DL_PATH=./MEHunter_DL # See step2, path of the downloaded model.
 export DEEPLEARNING_BATCHSIZE=32 # batch size of input, it highly affects memory usage, you may have to use another smaller number.
 export MEHunterEnvName=MEHunter # conda enviroment name of MEHunter

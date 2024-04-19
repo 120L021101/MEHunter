@@ -43,11 +43,12 @@ def load_cluster(args):
     return insertions, deletions
 
 def sw_algorith_main(*args):
-    failed_writer, success_writer, variants, ME_families, process_id = args
-    print("process {} starts".format(process_id))
+    failed_writer, success_writer, variants, ME_families, process_id, args = args
+    logging.basicConfig( stream=sys.stdout, level=logging.INFO, format=logFormat )
+    logging.info("process {} starts".format(process_id))
     for variant in variants:
         variant_seq = variant[3].encode(); variant_length = len(variant[3])
-        if variant_length < 100: continue
+        if variant_length < args.MIN_Consensus_length: continue
         
         if_failed = True
         for ME_family in ME_families:
@@ -65,10 +66,13 @@ def sw_algorith_main(*args):
         if if_failed:
             failed_writer.write("{}\n".format( '\t'.join(variant) )); failed_writer.flush()
 
-def re_alignment(args, MEI_writer, MED_writer):
+def re_alignment(args):
     '''
     re_align ME labeled sequences to corresponding subfamily of ME
     '''
+    MEI_path = os.path.join(args.work_dir, 'High_Quality_MEIs.txt'); MED_path = os.path.join(args.work_dir, 'High_Quality_MEDs.txt')
+    MEI_writer = open(file=MEI_path, mode='w', encoding='utf-8'); MED_writer = open(file=MED_path, mode='w', encoding='utf-8')   
+
     (Alu, SVA, L1) = (MEfamily('Alu'), MEfamily('SVA'), MEfamily('L1'))
 
     ME_families = [Alu, SVA, L1]
@@ -99,7 +103,7 @@ def re_alignment(args, MEI_writer, MED_writer):
         process_list = []
         for i in range(args.threads):
             process_list.append(Process(target=sw_algorith_main, args=
-                (process_failed_writer[i], process_success_writer[i], process_variants[i], ME_families, i)))
+                (process_failed_writer[i], process_success_writer[i], process_variants[i], ME_families, i, args)))
             process_list[i].start()
         for i in range(args.threads):
             process_list[i].join()
@@ -124,3 +128,4 @@ def re_alignment(args, MEI_writer, MED_writer):
             call('rm {}'.format(sub_failed_path))
 
     failed_writers[0].close(); failed_writers[1].close()
+    MEI_writer.close(); MED_writer.close()

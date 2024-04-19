@@ -3,13 +3,13 @@ import logging
 import pysam
 import subprocess, os, sys
 from typing import *
-from MEHunter.pre_classifier.utils import infer
+from MEHunter.pre_classifier.utils import infer, load_module
 from MEHunter.MEHunter_utils import call, is_empty
 
 logFormat = "%(asctime)s [%(levelname)s] %(message)s"
 
-def pre_classify(args):
-    infer(args)
+def activate_BERT(args): load_module(args)
+def BERT_classify(args): infer(args)
 
 def load_cluster(work_dir):
     insertions = []; deletions = []
@@ -24,24 +24,28 @@ def load_cluster(work_dir):
     return insertions, deletions
 
 
-def re_re_alignment(args, MEI_writer, MED_writer) -> Optional[List] and Optional[List]:
-    INS_ABNORMAL = is_empty(os.path.join(args.work_dir, 'dl_{}.fq'.format('ins')))
-    DEL_ABNORMAL = is_empty(os.path.join(args.work_dir, 'dl_{}.fq'.format('del')))
+def re_re_alignment(args) -> Optional[List] and Optional[List]:
+    MEI_path = os.path.join(args.work_dir, 'Candidate_MEIs.txt'); MED_path = os.path.join(args.work_dir, 'Candidate_MEDs.txt')
+    MEI_writer = open(file=MEI_path, mode='w', encoding='utf-8'); MED_writer = open(file=MED_path, mode='w', encoding='utf-8')   
+
+    INS_ABNORMAL = is_empty(os.path.join(args.work_dir, 'minimap2_{}.fq'.format('ins')))
+    DEL_ABNORMAL = is_empty(os.path.join(args.work_dir, 'minimap2_{}.fq'.format('del')))
     print(INS_ABNORMAL, DEL_ABNORMAL)
+
 
     for task in ['ins', 'del']:
         if INS_ABNORMAL and task == 'ins': continue
         if DEL_ABNORMAL and task == 'del': continue
         arguments = [
             args.known_ME, # input arg 1
-            os.path.join(args.work_dir, 'dl_{}.fq'.format(task)), # input arg 2
+            os.path.join(args.work_dir, 'minimap2_{}.fq'.format(task)), # input arg 2
             os.path.join(args.work_dir, 'align_{}_c2m.sam'.format(task)) # output 
         ]
         cmd = "minimap2 -a {} {} > {}".format(*arguments)
         call(cmd)
 
         arguments = [
-            os.path.join(args.work_dir, 'dl_{}.fq'.format(task)), # input arg 1
+            os.path.join(args.work_dir, 'minimap2_{}.fq'.format(task)), # input arg 1
             args.known_ME, # input arg 2
             os.path.join(args.work_dir, 'align_{}_m2c.sam'.format(task)) # output 
         ]
@@ -86,7 +90,9 @@ def re_re_alignment(args, MEI_writer, MED_writer) -> Optional[List] and Optional
             if not id_of_variant in variant_align: continue
             variant.append(variant_align[id_of_variant])
             writer.write("{}\n".format(variant))
-
+            writer.flush()
+            
+    MEI_writer.close(); MED_writer.close()
 
 def re_re_alignment2(work_dir, known_ME) -> Optional[List] and Optional[List]:
     

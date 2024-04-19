@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from MEHunter.MEHunter_utils import read_vcf, clear_workdir, call, kill_output, activate_output
-params = kill_output()
-from MEHunter.MEHunter_classfy import pre_classify, re_re_alignment
-activate_output(params)
+from MEHunter.MEHunter_utils import read_vcf, clear_workdir, call, kill_output, activate_output, cluster2fasta
+# params = kill_output()
+from MEHunter.MEHunter_classfy import BERT_classify, re_re_alignment, activate_BERT
+# activate_output(params)
 
-import builtins, warnings, sys, os, logging, argparse, time, gc
+import sys, os, logging, time, gc
 from MEHunter.MEHunter_description import parseArgs
 from MEHunter.MEHunter_toCluster import sigs2cluster
 from MEHunter.MEHunter_VCFwriter import write_to_vcf
@@ -37,30 +37,29 @@ def main_ctrl(args, argv):
         logging.error("No Such Directory: {}, check positional param cuteSV_workdir".format(args.cuteSV_workdir))
         exit()
 
-    MEI_path = os.path.join(args.work_dir, 'MEIs.txt'); MED_path = os.path.join(args.work_dir, 'MEDs.txt')
-    MEI_writer = open(file=MEI_path, mode='w', encoding='utf-8'); MED_writer = open(file=MED_path, mode='w', encoding='utf-8')   
-
     insertions, deletions, column_names = read_vcf( args.input ); gc.collect()
     logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
     logging.info("insertions found: {}".format(len(insertions)))
     logging.info("deletions found : {}".format(len(deletions)))
-    
+
     sigs2cluster( insertions, deletions, args ); gc.collect()
     logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
     logging.info("Finished Clustering and Consensus successfully")
 
     logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
     logging.info("Start modified SW algorithm calculation (1st round)")
-    re_alignment(args=args, MEI_writer=MEI_writer, MED_writer=MED_writer)
+    re_alignment(args=args)
 
     logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
     logging.info("Start DL inferrence and Minimap2 realignment (2nd round)")
-    pre_classify(args=args); 
-    re_re_alignment(args=args, MEI_writer=MEI_writer, MED_writer=MED_writer)
+    
+    cluster2fasta(args=args)
+    re_re_alignment(args=args)
+    BERT_classify(args=args)
 
     logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
     logging.info("Writing ME variants to {}".format(args.output))
-    write_to_vcf(insertions, deletions, MEI_path, MED_path, column_names, args, argv)
+    write_to_vcf(insertions, deletions, column_names, args, argv)
     
     if not args.retain_work_dir:
         clear_workdir(args)
@@ -73,6 +72,7 @@ def setupLogging(debug=False):
 
 def run(argv):
     args = parseArgs(argv)
+    activate_BERT(args)
     setupLogging(False)
     start_time = time.time()
     main_ctrl(args, argv)

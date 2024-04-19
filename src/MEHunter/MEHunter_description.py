@@ -62,7 +62,10 @@ def parseArgs(argv):
 	parser.add_argument('output', 
 		type = str, 
 		help = "Output VCF format file.")
-
+	parser.add_argument('--DL_module',
+		help='dir of DNABERT',
+		type=str,
+		default='/home/zzj/MEHunter/src/MEHunter/pre_classifier/model/')
 	# ************** Other Parameters******************
 	parser.add_argument('-t', '--threads', 
 		help = "Number of threads to use.[%(default)s]", 
@@ -81,6 +84,19 @@ def parseArgs(argv):
 		default = 16
 	)
 
+	parser.add_argument('--MAX_seqs',
+		help = "max seq num for consensus",
+		type = int,
+		default = 20
+	)
+
+	parser.add_argument('--MIN_Consensus_length',
+		help = "min length of Consensus",
+		type = int,
+		default = 100
+	)
+
+	
 	# GroupSignaturesCollect = parser.add_argument_group('Collection of SV signatures')
 	# GroupSignaturesCollect.add_argument('-p', '--max_split_parts', 
 	# 	help = "Maximum number of split segments a read may be aligned before it is ignored. All split segments are considered when using -1. \

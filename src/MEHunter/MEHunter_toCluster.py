@@ -36,7 +36,7 @@ def extract_sigs_with_reads(sigs : Optional[Dict], \
     for read_name in supporting_reads:
         closest_distance = None; closest_idx = None
         if read_name not in sigs: 
-            print(read_name, sigs.keys())
+            continue
             assert False
         for idx, (_, _, pos, _, r_name, seq) in enumerate(sigs[read_name]):
             pos = int(pos); index = int(index)
@@ -58,7 +58,7 @@ def extract_supporting_signatures(variant  : Optional[List], \
     support_reads = variant['INFO']
     for read_name in sigs:
         if read_name not in support_reads: 
-            print(read_name, support_reads)
+            # print(read_name, support_reads)
             assert False
         for (_, _, pos, _, read_name, seq) in sigs[read_name]:
             if read_name not in extract_sigs:
@@ -89,7 +89,7 @@ def process_func(*args):
                 abortion_flag = True
                 break
         if abortion_flag: continue
-        consensus = consensus_abPOA( find_similar_seqs(seqs) )
+        consensus = consensus_abPOA( find_similar_seqs(seqs, args.MAX_seqs) )
         cluster_writer.write(
             "{}\n".format("\t".join(
                 [ this_id, chromosome, str(pos), consensus, str(len(seqs)) ] # information items list
@@ -128,7 +128,7 @@ def sigs2cluster(insertions : Optional[pd.DataFrame], \
                 if DELETION_FLAG:
                     info_ls = [ int(info) if info.isdigit() else info for info in info_ls ]
                     info_ls.append(
-                        reference_genome[str(info_ls[1])][(info_ls[2]) : (info_ls[2] + info_ls[3])]
+                        str(reference_genome[str(info_ls[1])][(info_ls[2]) : (info_ls[2] + info_ls[3])])
                     )
                 read_name = info_ls[4]; chromosome = str(info_ls[1])
                 if chromosome not in sigs: sigs[chromosome] = { }

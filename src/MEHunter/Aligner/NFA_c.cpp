@@ -26,7 +26,7 @@ float epsilon_NFA(const string& seq1, const string& seq2, float min_score = 0.7,
     window_size = int( seq2_length * (1 - min_score) ) + 1;
     int max_epochs = int( seq2_length * (2 - min_score) ) + 1;
     int epoch = 0;
-    vector<int> states ( seq1_length + 1 ); for (int& val : states) val = -1;
+    vector<int> states ( seq1_length + 1, -1 );
     states[0] = 0;
 
     while (epoch < max_epochs) {

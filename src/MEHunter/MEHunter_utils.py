@@ -46,6 +46,38 @@ def clear_workdir(args):
     cmd = 'rm -rf {}'.format(path_)
     call(cmd=cmd)
 
+def cluster2fasta(args):
+    logFormat = "%(asctime)s [%(levelname)s] %(message)s"
+    cluster_readers = [
+        open(file=os.path.join(args.work_dir, 'failed_ins.cluster'), mode='r', encoding='utf-8'),
+        open(file=os.path.join(args.work_dir, 'failed_del.cluster'), mode='r', encoding='utf-8')
+    ]
+
+    success_writers = [
+        open(file=os.path.join(args.work_dir, 'minimap2_ins.fq'), mode='w', encoding='utf-8'),
+        open(file=os.path.join(args.work_dir, 'minimap2_del.fq'), mode='w', encoding='utf-8')
+    ]
+
+    for idx, (reader, writer) in enumerate(zip(cluster_readers, success_writers)):
+        INSERTION_FLAG, DELETION_FLAG = idx == 0, idx == 1
+        logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
+        logging.info("inferring {} clusters".format(
+            "insertion" if INSERTION_FLAG else "deletion"
+        ))
+        for line in reader:
+            info_ls = line.strip().split('\t')
+            writer.write(">{}|{}|{}\n".format(
+                info_ls[0], info_ls[1], info_ls[2]
+            ))
+            start = 0; end = 50
+            while start < len(info_ls[3]):
+                writer.write("{}\n".format(info_ls[3][start : end]))
+                start += 50; end += 50
+        continue
+
+    cluster_readers[0].close(); cluster_readers[1].close()
+    success_writers[0].close(); success_writers[1].close()
+
 def read_vcf(vcf_path):
     '''
     guarantee the safety of requesting the vcf file, e.g. existence
@@ -80,7 +112,7 @@ def read_vcf(vcf_path):
     
     # TODO: analyse cuteSV output and distinguish insertions and deletions from the result.
     
-    # insertions = insertions[:2000]; deletions = deletions[:2000]
+    # insertions = insertions[:1000]; deletions = deletions[:1000]
     # insertions, deletions = pd.DataFrame(insertions), pd.DataFrame(deletions)
     # insertions = insertions.head(200); deletions = deletions.head(200)
     return insertions, deletions, column_names

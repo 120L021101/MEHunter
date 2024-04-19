@@ -4,16 +4,13 @@ import time
 import os
 import logging
 import sys
+from MEHunter.MEHunter_description import VERSION
 
 def write_to_vcf(insertions : Optional[pd.DataFrame], \
                  deletions  : Optional[pd.DataFrame], \
-				 MEI_path : Optional[AnyStr], \
-                 MED_path  : Optional[AnyStr], \
 				 columns_name  : Optional[List], \
                  args, argv):
-	
-	
-	VERSION = '1.0.0' # this variable is previously declared in MEIHunter_description, meaning the version of this software
+
 	logFormat = "%(asctime)s [%(levelname)s] %(message)s"
 	logging.basicConfig( stream=sys.stderr, level=logging.ERROR, format=logFormat )
 	logging.info("Overwrite to {}".format( args.output ))
@@ -56,43 +53,60 @@ def write_to_vcf(insertions : Optional[pd.DataFrame], \
 
 	vcf_writer.write("##CommandLine=\"MEHunter %s\"\n"%(" ".join(argv)))
 	
-	MEtype_insert_idx = 3
-	columns_name.insert(MEtype_insert_idx, 'MEtype'); columns_name_ = columns_name
+	MEtype_insert_idx = 2
+	# columns_name.insert(MEtype_insert_idx, 'MEtype')
 	# like #CHROM POS balabalabala
 	vcf_writer.write("#{}\n".format("\t".join(columns_name)))
 
-	ME_insertions = []; ME_deletions = []
-	with open(file=MEI_path, mode='r', encoding='utf-8') as reader:
-		for line in reader: ME_insertions.append(eval(line.strip()))
-	with open(file=MED_path, mode='r', encoding='utf-8') as reader:
-		for line in reader: ME_deletions.append(eval(line.strip()))
+	MEI_paths = [
+		os.path.join(args.work_dir, 'High_Quality_MEIs.txt'),
+		os.path.join(args.work_dir, 'Potential_MEIs.txt'),
+		os.path.join(args.work_dir, 'Partial_MEIs.txt')
+	]
+	MED_paths = [
+		os.path.join(args.work_dir, 'High_Quality_MEDs.txt'),
+		os.path.join(args.work_dir, 'Potential_MEDs.txt'),
+		os.path.join(args.work_dir, 'Partial_MEDs.txt')
+	]
+	labels = ['High_Quality', 'Potential', 'Partial']
+	for (MEI_path, MED_path, label) in zip(MEI_paths, MED_paths, labels):
+		print(MEI_path, MED_path, label)
+		ME_insertions = []; ME_deletions = []
+		with open(file=MEI_path, mode='r', encoding='utf-8') as reader:
+			for line in reader: ME_insertions.append(eval(line.strip()))
+		with open(file=MED_path, mode='r', encoding='utf-8') as reader:
+			for line in reader: ME_deletions.append(eval(line.strip()))
 		
-	ins_information = { insertion[0] : insertion[1:] for insertion in ME_insertions }
-	del_information = { deletion[0] : deletion[1:] for deletion in ME_deletions }
-	del ME_insertions, ME_deletions
+		ins_information = { insertion[0] : insertion[1:] for insertion in ME_insertions }
+		del_information = { deletion[0] : deletion[1:] for deletion in ME_deletions }
+		del ME_insertions, ME_deletions
 
-	for idx, (variants, information) in enumerate(zip([insertions, deletions],
-									 [ins_information, del_information])):
-		INSERTION_FLAG, DELETION_FLAG = idx == 0, idx == 1	
-		for idx_, variant in enumerate(variants):
-			variant_id = variant[2]
-			if variant_id not in information: continue
-			# print(information[variant[2]]); print(variant); break
-			vcf_writer.write('{}\t'.format(
-				'\t'.join([ str(variant[column]) for column in range(MEtype_insert_idx)])
-			))
-			vcf_writer.write('{}'.format(
-				information[variant_id][-1]
-			))
-			for idx__, column in enumerate(columns_name[MEtype_insert_idx + 1:]):
-				idx__ = idx__ + MEtype_insert_idx
-				if INSERTION_FLAG and column == 'ALT':
-					vcf_writer.write('\t{}'.format(
-						information[variant_id][2]
-					)); continue
-				if DELETION_FLAG and column == 'REF':
-					vcf_writer.write('\t{}'.format(
-						information[variant_id][2]
-					)); continue
-				vcf_writer.write('\t{}'.format(variant[idx__]))
-			vcf_writer.write('\n')
+		for idx, (variants, information) in enumerate(zip([insertions, deletions],
+										[ins_information, del_information])):
+			INSERTION_FLAG, DELETION_FLAG = idx == 0, idx == 1	
+			for idx_, variant in enumerate(variants):
+				variant_id = variant[2]
+				if variant_id not in information:
+					continue
+				# print(information[variant[2]]); print(variant); break
+				vcf_writer.write('{}\t'.format(
+					'\t'.join([ str(variant[column]) for column in range(MEtype_insert_idx)])
+				))
+				vcf_writer.write('{}_\"{}\"'.format(
+					variant_id, label
+				))
+				# vcf_writer.write('\"{}\"'.format(
+				# 	label + '_' + information[variant_id][-1]
+				# ))
+				for idx__, column in enumerate(columns_name[MEtype_insert_idx + 1:]):
+					idx__ = idx__ + MEtype_insert_idx + 1
+					if INSERTION_FLAG and column == 'ALT':
+						vcf_writer.write('\t{}'.format(
+							information[variant_id][2]
+						)); continue
+					if DELETION_FLAG and column == 'REF':
+						vcf_writer.write('\t{}'.format(
+							information[variant_id][2]
+						)); continue
+					vcf_writer.write('\t{}'.format(variant[idx__]))
+				vcf_writer.write('\n')

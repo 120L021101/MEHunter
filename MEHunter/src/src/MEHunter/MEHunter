@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+
+from MEHunter.MEHunter_utils import read_vcf, clear_workdir, call, kill_output, activate_output, cluster2fasta
+# params = kill_output()
+from MEHunter.MEHunter_classfy import BERT_classify, re_re_alignment, activate_BERT
+# activate_output(params)
+
+import sys, os, logging, time, gc
+from MEHunter.MEHunter_description import parseArgs
+from MEHunter.MEHunter_toCluster import sigs2cluster
+from MEHunter.MEHunter_VCFwriter import write_to_vcf
+from MEHunter.MEHunter_realignment import re_alignment
+
+'''
+test command
+python MEHunter /root/MEHunter/MEHunter_examples/sample.vcf abcd abcd aabcd /root/MEHunter/MEHunter_examples/sample3.vcf
+'''
+
+logFormat = "%(asctime)s [%(levelname)s] %(message)s"
+
+def main_ctrl(args, argv):
+    # check safety
+    if not os.path.isfile(args.reference):
+        logging.basicConfig( stream=sys.stderr, level=logging.ERROR, format=logFormat )
+        logging.error("No Such File: {}, check positional param reference".format(args.reference))
+        exit()
+    if not os.path.isfile(args.alignment):
+        logging.basicConfig( stream=sys.stderr, level=logging.ERROR, format=logFormat )
+        logging.error("No Such File: {}, check positional param alignment".format(args.alignment))
+        exit()
+    if not os.path.exists(args.work_dir):
+        logging.basicConfig( stream=sys.stderr, level=logging.ERROR, format=logFormat )
+        logging.error("No Such Directory: {}, check positional param work_dir".format(args.work_dir))
+        exit()
+    if not os.path.exists(args.cuteSV_workdir):
+        logging.basicConfig( stream=sys.stderr, level=logging.ERROR, format=logFormat )
+        logging.error("No Such Directory: {}, check positional param cuteSV_workdir".format(args.cuteSV_workdir))
+        exit()
+
+    insertions, deletions, column_names = read_vcf( args.input ); gc.collect()
+    logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
+    logging.info("insertions found: {}".format(len(insertions)))
+    logging.info("deletions found : {}".format(len(deletions)))
+
+    sigs2cluster( insertions, deletions, args ); gc.collect()
+    logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
+    logging.info("Finished Clustering and Consensus successfully")
+
+    logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
+    logging.info("Start modified SW algorithm calculation (1st round)")
+    re_alignment(args=args)
+
+    logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
+    logging.info("Start DL inferrence and Minimap2 realignment (2nd round)")
+    
+    cluster2fasta(args=args)
+    re_re_alignment(args=args)
+    BERT_classify(args=args)
+
+    logging.basicConfig( stream=sys.stderr, level=logging.INFO, format=logFormat )
+    logging.info("Writing ME variants to {}".format(args.output))
+    write_to_vcf(insertions, deletions, column_names, args, argv)
+    
+    if not args.retain_work_dir:
+        clear_workdir(args)
+
+def setupLogging(debug=False):
+    logLevel = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig( stream=sys.stderr, level=logLevel, format=logFormat )
+    logging.info("Running %s" % " ".join(sys.argv))
+
+
+def run(argv):
+    args = parseArgs(argv)
+    activate_BERT(args)
+    setupLogging(False)
+    start_time = time.time()
+    main_ctrl(args, argv)
+    end_time = time.time()
+    logging.info("Finished in %0.2f seconds."%(end_time - start_time))
+
+if __name__ == '__main__':
+    run(sys.argv[1:])
+
