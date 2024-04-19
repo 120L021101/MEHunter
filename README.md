@@ -1,15 +1,129 @@
 # MEHunter
 
 ## Getting Start
-
-404 NOT FOUND
-
-<!-- 
+ 
 <img src="pics/image.png" width="100%" height="auto">
 
 ## Abstract
 MEHunter is a Natural Language Processing method based on BERT to comprehensively and accurately detect Mobile Element Insertions and Deletions utilizing third-generation sequencing technologies.
-Till now, I haven't summarized all the dependencies. Below is my conda environment:
+
+
+## Installation
+
+Follow the steps.
+
+### Step1: install cuteSV(our modified version)
+See https://github.com/tjiangHIT/cuteSV for detailed info of cuteSV's installation.
+
+Only made minor changes to cuteSV, so you can just replace the link in the original cuteSV text with: https://github.com/120L021101/cuteSV
+
+``` shell scripts
+#For example
+#From
+git clone https://github.com/tjiangHIT/cuteSV 
+#To
+git clone https://github.com/120L021101/cuteSV
+```
+
+As potential conflicts may occur, please install cuteSV under an independant conda environment, for example, cuteSVenv.
+
+```
+conda create -n cuteSVenv python=3.7
+conda activate cuteSVenv
+```
+
+### Step2: download our deep learning model
+You should download our deep learning model from  [this](https://huggingface.co/ATESTACCOUNTFORFIRSTUSE/MEHunter_DL).
+
+Download the model to the folder named "MEHunter_DL"(Customized folder name is OK).
+
+```
+MEHunter_DL/
+    model/
+        pytorch_model.bin
+        ...
+        ...
+    README.md
+    model.pth
+```
+
+### Step3: install minimap2
+See https://github.com/lh3/minimap2
+
+make sure you can successfully run "minimap2 -h"
+
+you may need to add minimap2 to $PATH
+
+```
+$ minimap2 -h
+Usage: minimap2 [options] <target.fa>|<target.idx> [query.fa] [...]
+Options:
+  Indexing:
+    -H           use homopolymer-compressed k-mer (preferrable for PacBio)
+    -k INT       k-mer size (no larger than 28) [15]
+    -w INT       minimizer window size [10]
+    -I NUM       split index for every ~NUM input bases [4G]
+    ....
+```
+### Step4: install MEHunter framework
+
+download the codes and 'cd' into it.
+
+Then run
+
+``` shell script
+conda create -n MEHunterEnv python=3.7
+conda activate MEHunterEnv
+pip install .
+```
+
+## Usage
+
+### An example
+
+``` shell script
+#################
+# SHARED PARAMS #
+#################
+export BAMPATH=/mnt/mybook/zzj_data2/HG00731/HIFI/pick_me.bam # alignment file, .bam
+export REFPATH=/mnt/mybook/Real_data/hg38.fa  # like hs37d5 or hg38, .fa
+export CUTESV_WORKDIR=./cuteWork/ # workdir of cuteSV, any dir is OK, and I personally recommend add "rm -rf $CUTESV_WORKDIR/*" before running.
+export CUTESV_OUTPUT=cuteSV_HiFi.vcf # path of cuteSV's final output, in .vcf format, note that it's acutually a path, not the file name.
+export PROCESS_NUM=16 # number of mutil-processing
+
+
+##########################
+# CUTESV'S UNIQUE PARAMS #
+##########################
+export MIN_SUPPORT=6 # minimal number of supporting reads, for detailed info, see original cuteSV doc.
+export cuteSVenvName=cuteSVenv # conda enviroment name of cuteSV, mine is cuteSVenv, same as what's mentioned above.
+
+conda activate $cuteSVenvName
+cuteSV $BAMFILE $REFPATH $CUTESV_OUTPUT --genotype \
+         $CUTESV_WORKDIR -s $MIN_SUPPORT -t $PROCESS_NUM -L 10000 --report_readid --retain_work_dir --diff_ratio_merging_INS 1.1 --diff_ratio_merging_DEL 1.1 --diff_ratio_filtering_TRA 1.1
+
+
+############################
+# MEHunter'S UNIQUE PARAMS #
+############################
+export MEHUNTER_WORKDIR=./MEHunterWork # workdir of MEHunter, any dir is OK, and I personally recommend add "rm -rf $MEHUNTER_WORKDIR/*" before running as well.
+export MEHUNTER_OUTPUT=./MEHunter_HiFi.vcf # path of MEHunter's final output, in .vcf format
+export KNOWN_ME_PATH=/data/3/zzj/ME_data/ME.fq # path of known ME sequences, .fq format
+export DL_PATH=./MEHunter_DL # See step2, path of the downloaded model.
+export DEEPLEARNING_BATCHSIZE=32 # batch size of input, it highly affects memory usage, you may have to use another smaller number.
+export MEHunterEnvName=MEHunter # conda enviroment name of MEHunter
+
+conda activate $MEHunterEnvName
+MEHunter $CUTESV_OUTPUT $BAMPATH \
+        $CUTESV_WORKDIR $REFPATH $KNOWN_ME_PATH $MEHUNTER_WORKDIR $MEHUNTER_OUTPUT \
+        --DL_module $DL_PATH --retain_work_dir -t $PROCESS_NUM --batch_size 32 --MAX_seqs 10
+
+```
+Those exported params are essential and/or frequently changed depending on need. Info of other params of cuteSV/MEHunter, see orginal doc and run MEHunter -h respectively.
+
+## Other info
+In case someone tries to install MEHunter in many years and needs to install some dependencies that cannot be directly and automatically installed, I here record my conda environment:
+
 ``` shell script
 # packages in environment at /home/zzj/anaconda3/envs/MEHunter:
 #
@@ -97,22 +211,3 @@ wheel                     0.42.0             pyhd8ed1ab_0    conda-forge
 xz                        5.2.6                h166bdaf_0    conda-forge
 zipp                      3.15.0                   pypi_0    pypi
 ```
-You should also install minimap2.
-
-## Installation
-
-To install MEHunter, run:
-
-``` shell script
-conda create -n MEHunterEnv python=3.7
-conda activate MEHunterEnv
-pip install .
-```
-
-## Usage
-
-``` shell script
-usage: MEHunter [-h] [--version] [-t THREADS] [--retain_work_dir]
-                [--batch_size BATCH_SIZE]
-                [VCF] [BAM] cuteSV_workdir reference known_ME work_dir output
-``` -->
