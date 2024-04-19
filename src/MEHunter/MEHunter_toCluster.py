@@ -93,8 +93,8 @@ def process_func(*args):
             ))
         ); cluster_writer.flush()
 
-def sigs2cluster(insertions : Optional[pd.DataFrame], \
-                 deletions  : Optional[pd.DataFrame], \
+def sigs2cluster(insertions : Optional[Any], \
+                 deletions  : Optional[Any], \
 				 args):
     '''
     this procedure produces 'ins.cluster' and 'del.cluster' in MEHunter's workdir
