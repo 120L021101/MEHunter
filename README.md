@@ -212,4 +212,4 @@ xz                        5.2.6                h166bdaf_0    conda-forge
 zipp                      3.15.0                   pypi_0    pypi
 ```
 
-And 120L021101(in the github path) was my student id when I did my batchler's degree at Harbin Institute of Technology, China. We had a nice course called Software Construction, I learned the design pattern of Java and created this account. That was 2022.
+And 120L021101(in the github path) was my student id when I did my bachelor's degree at Harbin Institute of Technology, China. We had a nice course called Software Construction, I learned the design pattern of Java and created this account. That was 2022.
