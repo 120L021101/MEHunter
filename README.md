@@ -73,8 +73,8 @@ Then run
 
 ``` shell script
 conda create -n MEHunterEnv python=3.7
-pip install Cython
 conda activate MEHunterEnv
+pip install Cython
 pip install .
 ```
 
