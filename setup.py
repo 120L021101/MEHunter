@@ -24,7 +24,7 @@ ext_modules=[
     Extension("MEHunter_pyNFA",
         sources=["./src/MEHunter/Aligner/pyNFA.pyx", "./src/MEHunter/Aligner/NFA_c.cpp"],
         language = "c++",
-        extra_compile_args=['-O2']
+        extra_compile_args=['-O2', '--std=c++11']
     )
 ]
 
@@ -42,6 +42,6 @@ setup(
     scripts=['src/MEHunter/MEHunter'],
     long_description = LONG_DESCRIPTION,
     zip_safe = False,
-    install_requires = ['einops', 'torch', 'transformers', 'pysam', 'pyfastx', 'pyabpoa', 'Biopython', 'Cigar'],
+    install_requires = ['pysam', 'Biopython', 'Cigar'],
     ext_modules = cythonize(ext_modules)
 )
