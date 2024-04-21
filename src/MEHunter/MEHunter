@@ -11,6 +11,8 @@ from MEHunter.MEHunter_toCluster import sigs2cluster
 from MEHunter.MEHunter_VCFwriter import write_to_vcf
 from MEHunter.MEHunter_realignment import re_alignment
 
+from MEHunter.MEHunter_utils import IS_DEBUG
+
 '''
 test command
 python MEHunter /root/MEHunter/MEHunter_examples/sample.vcf abcd abcd aabcd /root/MEHunter/MEHunter_examples/sample3.vcf

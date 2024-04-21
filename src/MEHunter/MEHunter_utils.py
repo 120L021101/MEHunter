@@ -2,7 +2,7 @@ import os
 import logging
 import sys
 import subprocess
-
+IS_DEBUG = False
 def is_empty(file_path):
     with open(file=file_path, mode='r', encoding='utf-8') as try_file:
         ret_value = not try_file.readline()

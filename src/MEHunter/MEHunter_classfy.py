@@ -60,27 +60,28 @@ def re_re_alignment(args) -> Optional[List] and Optional[List]:
     for (task, variant_align) in zip(['ins', 'del'], (ME_insertion_align, ME_deletion_align)):
         if INS_ABNORMAL and task == 'ins': continue
         if DEL_ABNORMAL and task == 'del': continue
+        try:
+            with pysam.AlignmentFile(
+                filename=os.path.join(args.work_dir, 'align_{}_c2m.sam'.format(task)),
+                mode='r') as align_file:
 
-        with pysam.AlignmentFile(
-            filename=os.path.join(args.work_dir, 'align_{}_c2m.sam'.format(task)),
-            mode='r') as align_file:
+                for read in align_file:
+                    if not read.reference_name: continue
+                    ME_family_name = read.reference_name.split('.')[0]
+                    key_word = read.query_name.split('|')[0]
+                    variant_align[key_word] = ME_family_name
+        except: pass
+        try:
+            with pysam.AlignmentFile(
+                filename=os.path.join(args.work_dir, 'align_{}_m2c.sam'.format(task)),
+                mode='r') as align_file:
 
-            for read in align_file:
-                if not read.reference_name: continue
-                ME_family_name = read.reference_name.split('.')[0]
-                key_word = read.query_name.split('|')[0]
-                variant_align[key_word] = ME_family_name
-
-        with pysam.AlignmentFile(
-            filename=os.path.join(args.work_dir, 'align_{}_m2c.sam'.format(task)),
-            mode='r') as align_file:
-
-            for read in align_file:
-                if not read.reference_name: continue
-                ME_family_name = read.query_name.split('.')[0]
-                key_word = read.reference_name.split('|')[0]
-                variant_align[key_word] = ME_family_name
-
+                for read in align_file:
+                    if not read.reference_name: continue
+                    ME_family_name = read.query_name.split('.')[0]
+                    key_word = read.reference_name.split('|')[0]
+                    variant_align[key_word] = ME_family_name
+        except: pass
     insertions, deletions = load_cluster(args.work_dir)
     for variants, variant_align, writer in zip((insertions, deletions), 
                                     (ME_insertion_align, ME_deletion_align),
