@@ -20,14 +20,14 @@ def clipping_data(batch_data):
         start = end
     return clipped_data, index_ls
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")   
 model = None
 
 def load_module(args):
     global device, model
     model_path = args.DL_module
     pretrained_model_path = os.path.join(model_path, 'model')
-    print(model_path)
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path, trust_remote_code=True)  
     pretrained_model = AutoModel.from_pretrained(pretrained_model_path, trust_remote_code=True)  
     model_path = os.path.join(args.DL_module, 'model.pth')
