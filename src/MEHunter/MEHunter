@@ -72,7 +72,8 @@ def setupLogging(debug=False):
 
 def run(argv):
     args = parseArgs(argv)
-    params = kill_output(); activate_BERT(args); activate_output(params)
+    if args.DEBUG: activate_BERT(args)
+    else: params = kill_output(); activate_BERT(args); activate_output(params)
     setupLogging(False)
     start_time = time.time()
     main_ctrl(args, argv)

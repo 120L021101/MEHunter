@@ -67,6 +67,7 @@ def parseArgs(argv):
 		type=str,
 		default='/home/zzj/MEHunter/src/MEHunter/pre_classifier/model/')
 	# ************** Other Parameters******************
+	parser.add_argument('--DEBUG', help='output detailed info', default=False, action='store_true')
 	parser.add_argument('-t', '--threads', 
 		help = "Number of threads to use.[%(default)s]", 
 		default = 8, 
